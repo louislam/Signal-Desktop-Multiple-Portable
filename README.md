@@ -5,9 +5,9 @@
 
 It is a modified Signal Desktop using the official source code, but with:
 
-* Multiple Instances, multiple accounts
+* Multiple instances, multiple accounts
 * Portable
-* Start in tray by default
+* Enable Tray Icon by default
 
 Currently, I build for Windows only.
 
