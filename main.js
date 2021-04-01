@@ -62,9 +62,8 @@ function getMainWindow() {
 
 // Tray icon and related objects
 let tray = null;
-const startInTray = true;
-const usingTrayIcon =
-  startInTray || process.argv.some(arg => arg === '--use-tray-icon');
+const startInTray = process.argv.some(arg => arg === '--start-in-tray');
+const usingTrayIcon = true;
 
 const config = require('./app/config');
 
