@@ -152,13 +152,14 @@ function showWindow() {
 
 if (!process.mas) {
   console.log('making app single instance');
-  const gotLock = app.requestSingleInstanceLock();
+  const gotLock = true; // original: app.requestSingleInstanceLock()
   if (!gotLock) {
     console.log('quitting; we are the second instance');
     app.exit();
   } else {
     app.on('second-instance', (e, argv) => {
       // Someone tried to run a second instance, we should focus our window
+      /*
       if (mainWindow) {
         if (mainWindow.isMinimized()) {
           mainWindow.restore();
@@ -166,13 +167,18 @@ if (!process.mas) {
 
         showWindow();
       }
+     */
+
       // Are they trying to open a sgnl:// href?
       const incomingHref = getIncomingHref(argv);
       if (incomingHref) {
         handleSgnlHref(incomingHref);
+
+        // Handled
+        return true;
       }
-      // Handled
-      return true;
+
+      return false;
     });
   }
 }
