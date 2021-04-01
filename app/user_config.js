@@ -7,14 +7,27 @@ const { app } = require('electron');
 
 const { start } = require('./base_config');
 const config = require('./config');
+const arg = require('arg');
+
+if (process.env.NODE_ENV === 'production') {
+  process.argv.unshift('tempNameForJustParsing')
+}
+
+const args = arg({
+  '--profile':    String,
+}, {
+  arg: process.argv,
+});
+
+console.log(process.argv)
+console.log(args)
 
 const dir = path.resolve('.');
-console.log(`original appData: ${app.getPath('appData')}`);
-console.log(`original userData: ${app.getPath('userData')}`);
-
 const profilesPath = path.join(dir, 'profiles');
-const profilePath = path.join(profilesPath, 'profile');
-console.log(`New Path: ${profilePath}`);
+
+const profileName = args['--profile'] || 'default';
+
+const profilePath = path.join(profilesPath, profileName);
 
 if (!fs.existsSync(profilesPath)){
   fs.mkdirSync(profilesPath);
@@ -25,7 +38,6 @@ if (!fs.existsSync(profilePath)){
 }
 
 app.setPath('userData', profilePath);
-console.log(`updated userData: ${app.getPath('userData')}`);
 
 /*
 // Use separate data directory for development

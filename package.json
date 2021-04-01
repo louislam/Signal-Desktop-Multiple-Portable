@@ -73,6 +73,7 @@
     "@types/pino": "6.3.6",
     "@types/pino-multi-stream": "5.1.0",
     "abort-controller": "3.0.0",
+    "arg": "^5.0.0",
     "array-move": "2.1.0",
     "axe-core": "4.1.4",
     "backbone": "1.3.3",
@@ -342,7 +343,7 @@
         }
       ],
       "target": [
-        "nsis"
+        "zip"
       ]
     },
     "nsis": {
@@ -454,6 +455,12 @@
       "!**/node_modules/ffi-napi/deps",
       "!**/node_modules/react-dom/*/*.development.js",
       "!node_modules/.cache"
+    ],
+    "extraFiles": [
+      {
+        "from": "extra",
+        "to": "."
+      }
     ]
   }
 }
