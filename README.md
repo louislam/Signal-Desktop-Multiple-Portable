@@ -16,6 +16,11 @@ Currently, I build for Windows only.
 ## Motivation
 I need to use multiple signal numbers at the same time in a PC. However, there is no way to do that currently. So I decided to modify it.
 
+## Download
+
+https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v1.40.1-mp1/signal-desktop-win-1.40.1-mp1.zip
+
+
 ## How to use
 
 In the app folder, by default, there are two bat files for 2 profiles:
