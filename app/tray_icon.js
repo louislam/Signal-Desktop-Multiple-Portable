@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const { app, Menu, Tray } = require('electron');
 const dockIcon = require('../ts/dock_icon');
+const multiplePortable = require('./multiple_portable');
 
 let trayContextMenu = null;
 let tray = null;
@@ -123,7 +124,7 @@ function createTrayIcon(getMainWindow, messages) {
 
   tray.on('click', tray.showWindow);
 
-  tray.setToolTip(messages.signalDesktop.message);
+  tray.setToolTip(`${messages.signalDesktop.message  } [${multiplePortable.profileName}]`);
   tray.updateContextMenu();
 
   return tray;
