@@ -511,6 +511,11 @@ async function createWindow() {
   mainWindow.on('leave-full-screen', () => {
     mainWindow.webContents.send('full-screen-change', false);
   });
+
+  mainWindow.on('page-title-updated', (event, title) => {
+    event.preventDefault();
+    mainWindow.title = `[${multiplePortable.profileName}] ${title}`;
+  });
 }
 
 ipc.on('show-window', () => {
