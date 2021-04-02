@@ -1,6 +1,8 @@
 
 # Signal-Desktop-Multiple-Portable
 
+<img src=".github/header.jpg" height="300" />
+
 ## What is it?
 
 It is a modified Signal Desktop using the official source code, but with:
