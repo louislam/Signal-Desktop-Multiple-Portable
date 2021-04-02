@@ -21,7 +21,6 @@ const GlobalErrors = require('./app/global_errors');
 const { setup: setupSpellChecker } = require('./app/spell_check');
 const { redactAll, addSensitivePath } = require('./ts/util/privacy');
 const removeUserConfig = require('./app/user_config').remove;
-const multiplePortable = require('./app/multiple_portable');
 
 GlobalErrors.addHandler();
 
@@ -44,8 +43,9 @@ const {
 } = electron;
 
 const animationSettings = systemPreferences.getAnimationSettings();
+const multiplePortable = require('./app/multiple_portable');
 
-multiplePortable.requestLock(app);
+multiplePortable.requestLock();
 
 const appUserModelId = `org.whispersystems.${packageJson.name}`;
 console.log('Set Windows Application User Model ID (AUMID)', {
@@ -186,22 +186,20 @@ function showWindow() {
 
 if (!process.mas) {
   console.log('making app single instance');
-  const gotLock = true; // original: app.requestSingleInstanceLock()
+  const gotLock = true;
   if (!gotLock) {
     console.log('quitting; we are the second instance');
     app.exit();
   } else {
     app.on('second-instance', (e, argv) => {
+
       // Someone tried to run a second instance, we should focus our window
-      /*
       if (mainWindow) {
         if (mainWindow.isMinimized()) {
           mainWindow.restore();
         }
-
         showWindow();
       }
-     */
 
       const incomingCaptchaHref = getIncomingCaptchaHref(argv);
       if (incomingCaptchaHref) {
