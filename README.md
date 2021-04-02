@@ -21,13 +21,19 @@ In the app folder, by default, there are two bat files for 2 profiles:
 * SignalProfile2.bat
 
 If you need more profiles, 
-1. copy SignalProfile1.bat, rename it.
+1. copy SignalProfile1.bat, rename it
 1. open it with any text editor
 1. change "profile1" to another name
 
 ```
 @echo off
 Start Signal.exe --profile <Your Profile Name>
+```
+
+The profiles are located in:
+
+```
+./profiles
 ```
 
 ## Original README

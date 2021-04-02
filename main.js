@@ -21,6 +21,7 @@ const GlobalErrors = require('./app/global_errors');
 const { setup: setupSpellChecker } = require('./app/spell_check');
 const { redactAll, addSensitivePath } = require('./ts/util/privacy');
 const removeUserConfig = require('./app/user_config').remove;
+const multiplePortable = require('./app/multiple_portable');
 
 GlobalErrors.addHandler();
 
@@ -43,6 +44,8 @@ const {
 } = electron;
 
 const animationSettings = systemPreferences.getAnimationSettings();
+
+multiplePortable.requestLock(app);
 
 const appUserModelId = `org.whispersystems.${packageJson.name}`;
 console.log('Set Windows Application User Model ID (AUMID)', {
@@ -1443,6 +1446,7 @@ app.on('before-quit', () => {
     shouldQuit: windowState.shouldQuit(),
   });
 
+  multiplePortable.releaseLock();
   windowState.markShouldQuit();
 });
 
