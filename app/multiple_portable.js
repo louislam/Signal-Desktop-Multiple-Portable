@@ -1,15 +1,15 @@
+const { app } = require('electron');
 const arg = require('arg');
 const fs = require('fs');
 const path = require('path');
 
 // Copy the array by using slice()
 // https://stackoverflow.com/questions/7486085/copy-array-by-value
-const args = parseArgv(process.argv.slice());
+const args = parseArgv(process.argv);
 const profileName = args['--profile'] || 'default';
 const dir = path.resolve('.');
 const profilesPath = path.join(dir, 'profiles');
 const profilePath = path.join(profilesPath, profileName);
-
 let lockFileInterval;
 
 if (! fs.existsSync(profilesPath)) {
@@ -20,15 +20,21 @@ if (! fs.existsSync(profilePath)) {
     fs.mkdirSync(profilePath);
 }
 
-function parseArgv(argv) {
-    if (process.env.NODE_ENV === 'production') {
-        argv.unshift('tempNameForJustParsing')
+function parseArgv(originalArgv) {
+    let argv;
+
+    if (app.isPackaged) {
+        argv = originalArgv.slice(1);
+    } else {
+        argv = originalArgv.slice(2);
     }
+
+    console.log(argv);
 
     return arg({
         '--profile':    String,
     }, {
-        arg: argv,
+        argv,
     });
 }
 
@@ -49,8 +55,7 @@ function releaseLock() {
         fs.unlinkSync(lockFile);
 }
 
-function requestLock(app) {
-
+function requestLock() {
     if (fs.existsSync(lockFile)) {
         const lockTimestamp = parseInt(fs.readFileSync(lockFile, 'utf-8'), 10);
 

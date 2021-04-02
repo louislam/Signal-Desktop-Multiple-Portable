@@ -19,7 +19,7 @@ const electron = require('electron');
 const packageJson = require('./package.json');
 const GlobalErrors = require('./app/global_errors');
 const { setup: setupSpellChecker } = require('./app/spell_check');
-const multiplePortable = require('./app/multiple_portable');
+
 
 GlobalErrors.addHandler();
 
@@ -40,7 +40,9 @@ const {
   systemPreferences,
 } = electron;
 
-multiplePortable.requestLock(app);
+const multiplePortable = require('./app/multiple_portable');
+
+multiplePortable.requestLock();
 
 const appUserModelId = `org.whispersystems.${packageJson.name}`;
 console.log('Set Windows Application User Model ID (AUMID)', {
@@ -154,22 +156,20 @@ function showWindow() {
 
 if (!process.mas) {
   console.log('making app single instance');
-  const gotLock = true; // original: app.requestSingleInstanceLock()
+  const gotLock = true;
   if (!gotLock) {
     console.log('quitting; we are the second instance');
     app.exit();
   } else {
     app.on('second-instance', (e, argv) => {
+
       // Someone tried to run a second instance, we should focus our window
-      /*
       if (mainWindow) {
         if (mainWindow.isMinimized()) {
           mainWindow.restore();
         }
-
         showWindow();
       }
-     */
 
       // Are they trying to open a sgnl:// href?
       const incomingHref = getIncomingHref(argv);
