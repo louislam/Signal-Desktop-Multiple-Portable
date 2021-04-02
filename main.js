@@ -575,6 +575,11 @@ async function createWindow() {
     mainWindow.webContents.send('full-screen-change', false);
   });
 
+  mainWindow.on('page-title-updated', (event, title) => {
+    event.preventDefault();
+    mainWindow.title = `[${multiplePortable.profileName}] ${title}`;
+  });
+
   mainWindow.once('ready-to-show', async () => {
     console.log('main window is ready-to-show');
 
