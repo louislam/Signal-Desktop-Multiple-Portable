@@ -1,7 +1,7 @@
 
 # Signal-Desktop-Multiple-Portable
 
-<img src=".github/header.jpg" height="300" />
+<img src=".github/header.jpg" width="100%" />
 
 ## What is it?
 
