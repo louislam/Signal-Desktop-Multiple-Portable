@@ -19,6 +19,8 @@ const electron = require('electron');
 const packageJson = require('./package.json');
 const GlobalErrors = require('./app/global_errors');
 const { setup: setupSpellChecker } = require('./app/spell_check');
+const { redactAll } = require('./js/modules/privacy');
+const removeUserConfig = require('./app/user_config').remove;
 
 
 GlobalErrors.addHandler();
@@ -31,6 +33,7 @@ const getRealPath = pify(fs.realpath);
 const {
   app,
   BrowserWindow,
+  clipboard,
   dialog,
   ipcMain: ipc,
   Menu,
@@ -82,6 +85,8 @@ const importMode =
 const development =
   config.environment === 'development' || config.environment === 'staging';
 
+const enableCI = Boolean(config.get('enableCI'));
+
 // We generally want to pull in our own modules after this point, after the user
 //   data directory has been set.
 const attachments = require('./app/attachments');
@@ -116,8 +121,15 @@ const {
   getTitleBarVisibility,
   TitleBarVisibility,
 } = require('./ts/types/Settings');
+const { Environment } = require('./ts/environment');
 
 let appStartInitialSpellcheckSetting = true;
+
+const defaultWebPrefs = {
+  devTools:
+    process.argv.some(arg => arg === '--enable-dev-tools') ||
+    config.environment !== Environment.Production,
+};
 
 async function getSpellCheckSetting() {
   const json = await sql.getItemById('spell-check');
@@ -219,7 +231,8 @@ function prepareURL(pathSegments, moreKeys) {
       cdnUrl0: config.get('cdn').get('0'),
       cdnUrl2: config.get('cdn').get('2'),
       certificateAuthority: config.get('certificateAuthority'),
-      environment: config.environment,
+      environment: enableCI ? 'production' : config.environment,
+      enableCI: enableCI ? true : undefined,
       node_version: process.versions.node,
       hostname: os.hostname(),
       appInstance: process.env.NODE_APP_INSTANCE,
@@ -321,6 +334,7 @@ async function createWindow() {
         ? '#ffffff' // Tests should always be rendered on a white background
         : '#3a76f0',
     webPreferences: {
+      ...defaultWebPrefs,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
       contextIsolation: false,
@@ -429,7 +443,7 @@ async function createWindow() {
     mainWindow.loadURL(prepareURL([__dirname, 'background.html'], moreKeys));
   }
 
-  if (config.get('openDevTools')) {
+  if (!enableCI && config.get('openDevTools')) {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
   }
@@ -680,6 +694,7 @@ function showAbout() {
     backgroundColor: '#3a76f0',
     show: false,
     webPreferences: {
+      ...defaultWebPrefs,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
       contextIsolation: false,
@@ -734,6 +749,7 @@ function showSettingsWindow() {
     show: false,
     modal: true,
     webPreferences: {
+      ...defaultWebPrefs,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
       contextIsolation: false,
@@ -803,6 +819,7 @@ async function showStickerCreator() {
     backgroundColor: '#3a76f0',
     show: false,
     webPreferences: {
+      ...defaultWebPrefs,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
       contextIsolation: false,
@@ -857,6 +874,7 @@ async function showDebugLogWindow() {
     show: false,
     modal: true,
     webPreferences: {
+      ...defaultWebPrefs,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
       contextIsolation: false,
@@ -907,6 +925,7 @@ function showPermissionsPopupWindow(forCalling, forCamera) {
       show: false,
       modal: true,
       webPreferences: {
+        ...defaultWebPrefs,
         nodeIntegration: false,
         nodeIntegrationInWorker: false,
         contextIsolation: false,
@@ -953,7 +972,12 @@ app.on('ready', async () => {
   // We use this event only a single time to log the startup time of the app
   // from when it's first ready until the loading screen disappears.
   ipc.once('signal-app-loaded', () => {
-    console.log('App has finished loading in:', Date.now() - startTime);
+    const loadTime = Date.now() - startTime;
+    console.log('App loaded - time:', loadTime);
+
+    if (enableCI) {
+      console._log('ci: app_loaded=%j', { loadTime });
+    }
   });
 
   const userDataPath = await getRealPath(app.getPath('userData'));
@@ -1040,6 +1064,7 @@ app.on('ready', async () => {
       frame: false,
       backgroundColor: '#3a76f0',
       webPreferences: {
+        ...defaultWebPrefs,
         nodeIntegration: false,
         preload: path.join(__dirname, 'loading_preload.js'),
       },
@@ -1057,12 +1082,37 @@ app.on('ready', async () => {
     loadingWindow.loadURL(prepareURL([__dirname, 'loading.html']));
   });
 
-  const success = await sqlInitPromise;
-
-  if (!success) {
+  try {
+    await sqlInitPromise;
+  } catch (error) {
     console.log('sql.initialize was unsuccessful; returning early');
+    const buttonIndex = dialog.showMessageBoxSync({
+      buttons: [
+        locale.messages.copyErrorAndQuit.message,
+        locale.messages.deleteAndRestart.message,
+      ],
+      defaultId: 0,
+      detail: redactAll(error.stack),
+      message: locale.messages.databaseError.message,
+      noLink: true,
+      type: 'error',
+    });
+
+    if (buttonIndex === 0) {
+      clipboard.writeText(
+        `Database startup error:\n\n${redactAll(error.stack)}`
+      );
+    } else {
+      await sql.removeDB();
+      removeUserConfig();
+      app.relaunch();
+    }
+
+    app.exit(1);
+
     return;
   }
+
   // eslint-disable-next-line more/no-then
   appStartInitialSpellcheckSetting = await getSpellCheckSetting();
   await sqlChannels.initialize();
@@ -1074,10 +1124,10 @@ app.on('ready', async () => {
       await sql.removeIndexedDBFiles();
       await sql.removeItemById(IDB_KEY);
     }
-  } catch (error) {
+  } catch (err) {
     console.log(
       '(ready event handler) error deleting IndexedDB:',
-      error && error.stack ? error.stack : error
+      err && err.stack ? err.stack : err
     );
   }
 
@@ -1112,10 +1162,10 @@ app.on('ready', async () => {
 
   try {
     await attachments.clearTempPath(userDataPath);
-  } catch (error) {
+  } catch (err) {
     logger.error(
       'main/ready: Error deleting temp dir:',
-      error && error.stack ? error.stack : error
+      err && err.stack ? err.stack : err
     );
   }
   await attachmentChannel.initialize({
@@ -1132,7 +1182,12 @@ app.on('ready', async () => {
 
   setupMenu();
 
-  ensureFilePermissions(['config.json', 'sql/db.sqlite']);
+  ensureFilePermissions([
+    'config.json',
+    'sql/db.sqlite',
+    'sql/db.sqlite-wal',
+    'sql/db.sqlite-shm',
+  ]);
 });
 
 function setupMenu(options) {
@@ -1141,6 +1196,7 @@ function setupMenu(options) {
     ...options,
     development,
     isBeta: isBeta(app.getVersion()),
+    devTools: defaultWebPrefs.devTools,
     showDebugLog: showDebugLogWindow,
     showKeyboardShortcuts,
     showWindow,
@@ -1262,6 +1318,12 @@ app.on('will-finish-launching', () => {
     handleSgnlHref(incomingHref);
   });
 });
+
+if (enableCI) {
+  ipc.on('set-provisioning-url', (event, provisioningURL) => {
+    console._log('ci: provisioning_url=%j', provisioningURL);
+  });
+}
 
 ipc.on('set-badge-count', (event, count) => {
   app.badgeCount = count;
@@ -1455,6 +1517,16 @@ ipc.on('get-built-in-images', async () => {
 ipc.on('locale-data', event => {
   // eslint-disable-next-line no-param-reassign
   event.returnValue = locale.messages;
+});
+
+ipc.on('user-config-key', event => {
+  // eslint-disable-next-line no-param-reassign
+  event.returnValue = userConfig.get('key');
+});
+
+ipc.on('get-user-data-path', event => {
+  // eslint-disable-next-line no-param-reassign
+  event.returnValue = app.getPath('userData');
 });
 
 function getDataFromMainWindow(name, callback) {
