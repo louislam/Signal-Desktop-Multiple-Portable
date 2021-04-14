@@ -43,13 +43,19 @@ The profiles are located in:
 ./profiles
 ```
 
+## How to Update?
+
+1. close all running instances
+1. move your ./profiles and .bat files to the newer version folder
+1. that's it
+
 ## Original README
 
 https://github.com/signalapp/Signal-Desktop
 
 
 
-## Merge Update from Upstream
+## [For me] Merge Update from Upstream
 
 1. git fetch official
 1. git merge official/master
