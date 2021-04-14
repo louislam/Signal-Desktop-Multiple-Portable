@@ -18,7 +18,8 @@ I need to use multiple signal numbers at the same time in a PC. However, there i
 
 ## Download
 
-https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v1.40.1-mp1/signal-desktop-win-1.40.1-mp1.zip
+* <a href="https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v5.0.0-mp1/signal-desktop-win-5.0.0-mp1.zip">5.0.0-mp1.zip (Windows)</a>
+* <a href="https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v1.40.1-mp1/signal-desktop-win-1.40.1-mp1.zip">1.40.1-mp1.zip (Windows)</a>
 
 
 ## How to use
@@ -63,5 +64,6 @@ https://github.com/signalapp/Signal-Desktop
 1. npm run clean-protobuf   (rm command is not working in Windows, remove the files manually)
 1. npm run build-protobuf
 1. npm run transpile
+1. npm run build:dev   
 1. npm run start
 
