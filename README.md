@@ -46,3 +46,16 @@ The profiles are located in:
 ## Original README
 
 https://github.com/signalapp/Signal-Desktop
+
+
+
+## Merge Update from Upstream
+
+1. git fetch official
+1. git merge official/master
+1. npm run clean-transpile
+1. npm run clean-protobuf   (rm command is not working in Windows, remove the files manually)
+1. npm run build-protobuf
+1. npm run transpile
+1. npm run start
+
