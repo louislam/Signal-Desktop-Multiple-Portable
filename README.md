@@ -18,6 +18,7 @@ I need to use multiple signal numbers at the same time in a PC. However, there i
 
 ## Download
 
+* <a href="https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/5.4.1/signal-desktop-win-5.4.1.zip">5.4.1.zip (Windows)</a> (2021-06-15)
 * <a href="https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v5.0.0-mp1/signal-desktop-win-5.0.0-mp1.zip">5.0.0-mp1.zip (Windows)</a>
 * <a href="https://github.com/louislam/Signal-Desktop-Multiple-Portable/releases/download/v1.40.1-mp1/signal-desktop-win-1.40.1-mp1.zip">1.40.1-mp1.zip (Windows)</a>
 
