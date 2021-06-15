@@ -45,7 +45,7 @@ function timestamp() {
 }
 
 function createLockFile() {
-    fs.writeFileSync(lockFile, timestamp());
+    fs.writeFileSync(lockFile, `${timestamp()}`);
 }
 
 function releaseLock() {
