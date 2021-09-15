@@ -1,6 +1,8 @@
 
 # Signal-Desktop-Multiple-Portable
 
+[⚠️Unmaintained: As the upstream keeps changing, it is hard to merge the code]
+
 <img src=".github/header.jpg" width="100%" />
 
 ## What is it?
