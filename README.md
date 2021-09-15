@@ -1,7 +1,7 @@
 
 # Signal-Desktop-Multiple-Portable
 
-[⚠️Unmaintained: As the upstream keeps changing, it is hard to merge the code]
+[⚠️ Abandoned and Unmaintained: As the upstream keeps changing, it is hard to merge the code]
 
 <img src=".github/header.jpg" width="100%" />
 
